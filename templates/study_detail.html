@@ -53,6 +53,9 @@
             <div class="card mt-4">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h5 class="mb-0"><i class="fas fa-file-text me-2"></i>Passage Text</h5>
+                    <button type="button" id="preview-analysis" class="btn btn-sm btn-secondary">
+                        <i class="fas fa-chart-bar me-1"></i>Preview Analysis
+                    </button>
                 </div>
                 <div class="card-body">
                     <div class="mb-3">
@@ -63,6 +66,21 @@
                                   rows="8" placeholder="Paste the full text of the Bible passage here..." required>{{ study.passage_text }}</textarea>
                         <div class="form-text">
                             This text will be analyzed for word frequency and common phrases
+                        </div>
+                    </div>
+                    
+                    <!-- Analysis Preview Section -->
+                    <div id="analysis-preview" style="display: none;">
+                        <hr>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6><i class="fas fa-chart-bar me-2"></i>Top Words</h6>
+                                <div id="word-freq-preview" class="small"></div>
+                            </div>
+                            <div class="col-md-6">
+                                <h6><i class="fas fa-link me-2"></i>Common Phrases</h6>
+                                <div id="bigram-freq-preview" class="small"></div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -241,6 +259,9 @@
 document.addEventListener('DOMContentLoaded', function() {
     const passageInput = document.getElementById('passage');
     const bibleGatewayLink = document.getElementById('bible-gateway-link');
+    const previewButton = document.getElementById('preview-analysis');
+    const passageTextArea = document.getElementById('passage_text');
+    const analysisPreview = document.getElementById('analysis-preview');
     
     // Generate Bible Gateway link when passage is changed
     passageInput.addEventListener('input', function() {
@@ -254,6 +275,67 @@ document.addEventListener('DOMContentLoaded', function() {
             bibleGatewayLink.style.display = 'none';
         }
     });
+    
+    // Preview analysis functionality
+    previewButton.addEventListener('click', function() {
+        const passageText = passageTextArea.value.trim();
+        if (!passageText) {
+            alert('Please enter the passage text first.');
+            return;
+        }
+        
+        // Show loading state
+        this.disabled = true;
+        this.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Analyzing...';
+        
+        // Send request to analyze text
+        fetch('/analyze_text', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ text: passageText })
+        })
+        .then(response => response.json())
+        .then(data => {
+            displayAnalysis(data.word_freq, data.bigram_freq);
+            analysisPreview.style.display = 'block';
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error analyzing text. Please try again.');
+        })
+        .finally(() => {
+            // Reset button
+            this.disabled = false;
+            this.innerHTML = '<i class="fas fa-chart-bar me-1"></i>Preview Analysis';
+        });
+    });
+    
+    function displayAnalysis(wordFreq, bigramFreq) {
+        const wordFreqDiv = document.getElementById('word-freq-preview');
+        const bigramFreqDiv = document.getElementById('bigram-freq-preview');
+        
+        // Display word frequency
+        let wordHtml = '';
+        for (const [word, count] of Object.entries(wordFreq)) {
+            wordHtml += `<div class="d-flex justify-content-between mb-1">
+                <span>${word}</span>
+                <span class="badge bg-primary">${count}</span>
+            </div>`;
+        }
+        wordFreqDiv.innerHTML = wordHtml || '<p class="text-muted">No significant words found.</p>';
+        
+        // Display bigram frequency
+        let bigramHtml = '';
+        for (const [phrase, count] of Object.entries(bigramFreq)) {
+            bigramHtml += `<div class="d-flex justify-content-between mb-1">
+                <span>${phrase}</span>
+                <span class="badge bg-secondary">${count}</span>
+            </div>`;
+        }
+        bigramFreqDiv.innerHTML = bigramHtml || '<p class="text-muted">No significant phrases found.</p>';
+    }
 });
 </script>
 {% endif %}
