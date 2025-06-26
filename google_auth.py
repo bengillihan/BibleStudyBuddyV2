@@ -17,18 +17,23 @@ GOOGLE_DISCOVERY_URL = "https://accounts.google.com/.well-known/openid-configura
 # Get the domain for OAuth redirects
 dev_domain = os.environ.get("REPLIT_DEV_DOMAIN", "localhost")
 production_domain = "biblestudybuddyv2-production.up.railway.app"
+custom_domain = "bsb.bengillihan.com"
 
 DEV_REDIRECT_URL = f'https://{dev_domain}/google_login/callback'
 PROD_REDIRECT_URL = f'https://{production_domain}/google_login/callback'
+CUSTOM_REDIRECT_URL = f'https://{custom_domain}/google_login/callback'
 
 # ALWAYS display setup instructions to the user:
 print(f"""To make Google authentication work:
 1. Go to https://console.cloud.google.com/apis/credentials
 2. Create a new OAuth 2.0 Client ID
-3. Add BOTH of these URLs to Authorized redirect URIs:
+3. Add these common redirect URIs (or use wildcard pattern if supported):
    - Development: {DEV_REDIRECT_URL}
    - Production: {PROD_REDIRECT_URL}
+   - Custom Domain: {CUSTOM_REDIRECT_URL}
+   - Or use pattern: https://yourdomain.com/google_login/callback
 
+Note: The app now dynamically constructs redirect URLs for any domain.
 For detailed instructions, see:
 https://docs.replit.com/additional-resources/google-auth-in-flask#set-up-your-oauth-app--client
 """)
@@ -41,13 +46,9 @@ google_auth = Blueprint("google_auth", __name__)
 def get_redirect_url():
     """Get the appropriate redirect URL based on the current domain"""
     host = request.host
-    if "railway.app" in host:
-        return PROD_REDIRECT_URL
-    elif "replit.dev" in host:
-        return DEV_REDIRECT_URL
-    else:
-        # Fallback for local development
-        return request.base_url.replace("http://", "https://") + "/callback"
+    # Always use HTTPS and construct the callback URL dynamically
+    # This allows any domain to work without hardcoding
+    return f"https://{host}/google_login/callback"
 
 @google_auth.route("/google_login")
 def login():
@@ -66,11 +67,29 @@ def login():
 
 @google_auth.route("/google_login/callback")
 def callback():
+    # Add debugging for OAuth callback
     code = request.args.get("code")
+    error = request.args.get("error")
+    
+    # Log the current request details for debugging
+    current_host = request.host
+    redirect_url = get_redirect_url()
+    
+    print(f"OAuth Callback Debug:")
+    print(f"  Host: {current_host}")
+    print(f"  Redirect URL: {redirect_url}")
+    print(f"  Code present: {bool(code)}")
+    print(f"  Error: {error}")
+    print(f"  Full URL: {request.url}")
+    
+    if error:
+        return f"OAuth Error: {error}", 400
+    
+    if not code:
+        return "Missing authorization code. Please check your Google OAuth configuration.", 400
+    
     google_provider_cfg = requests.get(GOOGLE_DISCOVERY_URL).json()
     token_endpoint = google_provider_cfg["token_endpoint"]
-
-    redirect_url = get_redirect_url()
     
     token_url, headers, body = client.prepare_token_request(
         token_endpoint,

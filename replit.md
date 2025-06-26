@@ -105,3 +105,4 @@ Changelog:
 - June 26, 2025: Fixed text visibility issues in study view by adding proper contrast
 - June 26, 2025: Updated favicon to clean Bible book design with red cross
 - June 26, 2025: Fixed Railway deployment configuration by adding railway.yaml, Procfile, and runtime.txt to ensure Gunicorn is used instead of Flask dev server
+- June 26, 2025: Enhanced OAuth system to dynamically handle any domain (bsb.bengillihan.com, Railway URLs, etc.) with improved error handling and debugging
