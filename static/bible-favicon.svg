@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="32" height="32">
+  <!-- Bible background -->
+  <rect x="10" y="5" width="80" height="90" rx="5" ry="5" fill="#8b4513" />
+  
+  <!-- Bible pages -->
+  <rect x="15" y="10" width="72" height="80" rx="2" ry="2" fill="#f5f5dc" />
+  
+  <!-- Bible bookmark -->
+  <rect x="50" y="10" width="6" height="20" fill="#800000" />
+  
+  <!-- Bible cover binding lines -->
+  <line x1="10" y1="20" x2="10" y2="80" stroke="#5d2906" stroke-width="2" />
+  <line x1="90" y1="20" x2="90" y2="80" stroke="#5d2906" stroke-width="2" />
+  
+  <!-- Bible spine -->
+  <rect x="10" y="5" width="5" height="90" fill="#6b3510" />
+  
+  <!-- Cross emblem -->
+  <path d="M 50 30 L 50 70 M 30 50 L 70 50" stroke="#800000" stroke-width="5" stroke-linecap="round" />
+</svg>

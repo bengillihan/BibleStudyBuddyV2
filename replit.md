@@ -100,3 +100,7 @@ Changelog:
 - June 26, 2025: Updated study form with question labels above inputs, Bible Gateway ESV links, and text analysis preview
 - June 26, 2025: Fixed study detail template error using enumerate (production 500 error)
 - June 26, 2025: Enhanced text analysis to group word variations and only show words/phrases appearing more than once
+- June 26, 2025: Added Preview Analysis functionality to edit study form for consistency
+- June 26, 2025: Doubled answer box height (6 rows) for better writing experience
+- June 26, 2025: Fixed text visibility issues in study view by adding proper contrast
+- June 26, 2025: Updated favicon to clean Bible book design with red cross
