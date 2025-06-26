@@ -29,6 +29,12 @@
                                 </label>
                                 <input type="text" class="form-control" id="passage" name="passage" 
                                        value="{{ study.passage }}" required>
+                                <div class="form-text">Enter the specific verses you're studying</div>
+                                <div id="bible-gateway-link" class="mt-2">
+                                    <a href="https://www.biblegateway.com/passage/?search={{ study.passage | urlencode }}&version=ESV" target="_blank" class="btn btn-sm btn-outline-primary">
+                                        <i class="fas fa-external-link-alt me-1"></i>Open in Bible Gateway (ESV)
+                                    </a>
+                                </div>
                             </div>
                         </div>
                         <div class="col-md-4">
@@ -45,34 +51,52 @@
             </div>
 
             <div class="card mt-4">
-                <div class="card-header">
-                    <h5 class="mb-0"><i class="fas fa-question-circle me-2"></i>Reflection Questions</h5>
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="fas fa-file-text me-2"></i>Passage Text</h5>
                 </div>
                 <div class="card-body">
-                    <div class="row">
-                        {% for i in range(1, 11) %}
-                        {% set question = study.get_questions()[i-1] %}
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label for="question_{{ i }}" class="form-label">Question {{ i }}</label>
-                                <textarea class="form-control" id="question_{{ i }}" name="question_{{ i }}" 
-                                          rows="2">{{ question or '' }}</textarea>
-                            </div>
+                    <div class="mb-3">
+                        <label for="passage_text" class="form-label">
+                            Bible Text for Analysis *
+                        </label>
+                        <textarea class="form-control" id="passage_text" name="passage_text" 
+                                  rows="8" placeholder="Paste the full text of the Bible passage here..." required>{{ study.passage_text }}</textarea>
+                        <div class="form-text">
+                            This text will be analyzed for word frequency and common phrases
                         </div>
-                        {% endfor %}
                     </div>
                 </div>
             </div>
 
             <div class="card mt-4">
                 <div class="card-header">
-                    <h5 class="mb-0"><i class="fas fa-file-text me-2"></i>Passage Text</h5>
+                    <h5 class="mb-0"><i class="fas fa-question-circle me-2"></i>Reflection Questions</h5>
                 </div>
                 <div class="card-body">
-                    <div class="mb-3">
-                        <label for="passage_text" class="form-label">Bible Text for Analysis *</label>
-                        <textarea class="form-control" id="passage_text" name="passage_text" 
-                                  rows="8" required>{{ study.passage_text }}</textarea>
+                    {% set question_data = [
+                        {"title": "Read the Text Twice", "desc": "Take notes or underline key words or repeated ideas."},
+                        {"title": "Why Was This Written?", "desc": "What situation or problem is being addressed?"},
+                        {"title": "What's the Overall Message?", "desc": "Summarize the passage's main idea in 1–2 sentences."},
+                        {"title": "What Principle or Truth Does It Teach?", "desc": "What timeless truth is revealed about God, life, or human nature?"},
+                        {"title": "What Does It Say About God, Christ, or the Holy Spirit?", "desc": "Note any attributes, actions, or promises."},
+                        {"title": "What Does It Say About the Nature of Man?", "desc": "What does this reveal about our tendencies, sins, or needs?"},
+                        {"title": "What New Insight or Reminder Did I Gain?", "desc": "What stood out as fresh or convincing?"},
+                        {"title": "If God Gave Me Only This Passage, What Is He Saying to Me?", "desc": "What would the Lord want me to hear or do?"},
+                        {"title": "Personal Application — What Will I Do and When?", "desc": "Be specific, realistic, and time bound."},
+                        {"title": "Review Last Application", "desc": "Did I follow through? Why or why not? What needs to change?"}
+                    ] %}
+                    <div class="row">
+                        {% for i in range(1, 11) %}
+                        {% set question = study.get_questions()[i-1] %}
+                        <div class="col-md-6">
+                            <div class="mb-4">
+                                <h6 class="fw-bold mb-1">{{ question_data[i-1].title }}</h6>
+                                <p class="text-muted small mb-2">{{ question_data[i-1].desc }}</p>
+                                <textarea class="form-control" id="question_{{ i }}" name="question_{{ i }}" 
+                                          rows="3" placeholder="Enter your reflection...">{{ question or '' }}</textarea>
+                            </div>
+                        </div>
+                        {% endfor %}
                     </div>
                 </div>
             </div>
@@ -207,4 +231,28 @@
         {% endif %}
     </div>
 </div>
+
+{% block scripts %}
+{% if edit_mode %}
+<script>
+// Add functionality for edit form
+document.addEventListener('DOMContentLoaded', function() {
+    const passageInput = document.getElementById('passage');
+    const bibleGatewayLink = document.getElementById('bible-gateway-link');
+    
+    // Generate Bible Gateway link when passage is changed
+    passageInput.addEventListener('input', function() {
+        const passage = this.value.trim();
+        if (passage) {
+            const encodedPassage = encodeURIComponent(passage);
+            const url = `https://www.biblegateway.com/passage/?search=${encodedPassage}&version=ESV`;
+            bibleGatewayLink.querySelector('a').href = url;
+            bibleGatewayLink.style.display = 'block';
+        } else {
+            bibleGatewayLink.style.display = 'none';
+        }
+    });
+});
+</script>
+{% endif %}
 {% endblock %}
