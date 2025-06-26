@@ -92,4 +92,6 @@ Preferred communication style: Simple, everyday language.
 ## Changelog
 
 Changelog:
-- June 26, 2025. Initial setup
+- June 26, 2025: Initial setup with Flask, Google OAuth, and Supabase integration
+- June 26, 2025: Updated app name to "Bible Study Buddy"
+- June 26, 2025: Configured Google OAuth for dual environment support (dev + Railway production)
