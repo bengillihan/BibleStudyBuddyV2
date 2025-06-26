@@ -31,7 +31,7 @@ def studies():
     
     return render_template('studies.html', studies=all_studies)
 
-@app.route('/new-study', methods=['GET', 'POST'])
+@app.route('/new_study', methods=['GET', 'POST'])
 @login_required
 def new_study():
     if request.method == 'POST':
@@ -59,12 +59,11 @@ def new_study():
             word_freq, bigram_freq = analyze_text(passage_text)
             
             # Create new study session
-            study = StudySession(
-                user_id=current_user.id,
-                passage=passage,
-                date=study_date,
-                passage_text=passage_text
-            )
+            study = StudySession()
+            study.user_id = current_user.id
+            study.passage = passage
+            study.date = study_date
+            study.passage_text = passage_text
             
             # Set questions
             study.set_questions(questions)

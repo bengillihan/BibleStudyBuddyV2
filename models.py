@@ -11,6 +11,10 @@ class User(UserMixin, db.Model):
     # Relationship to study sessions
     study_sessions = db.relationship('StudySession', backref='user', lazy=True, cascade='all, delete-orphan')
 
+    def __init__(self, username=None, email=None):
+        self.username = username
+        self.email = email
+
 class StudySession(db.Model):
     __tablename__ = 'study_sessions'
     
