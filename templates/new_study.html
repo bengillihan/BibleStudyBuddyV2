@@ -22,6 +22,11 @@
                                 <input type="text" class="form-control" id="passage" name="passage" 
                                        placeholder="e.g., John 3:16-21" required>
                                 <div class="form-text">Enter the specific verses you're studying</div>
+                                <div id="bible-gateway-link" class="mt-2" style="display: none;">
+                                    <a href="#" target="_blank" class="btn btn-sm btn-outline-primary">
+                                        <i class="fas fa-external-link-alt me-1"></i>Open in Bible Gateway (ESV)
+                                    </a>
+                                </div>
                             </div>
                         </div>
                         <div class="col-md-4">
@@ -37,39 +42,11 @@
             </div>
 
             <div class="card mt-4">
-                <div class="card-header">
-                    <h5 class="mb-0"><i class="fas fa-question-circle me-2"></i>Reflection Questions</h5>
-                </div>
-                <div class="card-body">
-                    {% set default_questions = [
-                        "Read the Text Twice (Take notes or underline key words or repeated ideas.)",
-                        "Why Was This Written? (What situation or problem is being addressed?)",
-                        "What's the Overall Message? (Summarize the passage's main idea in 1–2 sentences.)",
-                        "What Principle or Truth Does It Teach? (What timeless truth is revealed about God, life, or human nature?)",
-                        "What Does It Say About God, Christ, or the Holy Spirit? (Note any attributes, actions, or promises.)",
-                        "What Does It Say About the Nature of Man? (What does this reveal about our tendencies, sins, or needs?)",
-                        "What New Insight or Reminder Did I Gain? (What stood out as fresh or convincing?)",
-                        "If God Gave Me Only This Passage, What Is He Saying to Me? (What would the Lord want me to hear or do?)",
-                        "Personal Application — What Will I Do and When? (Be specific, realistic, and time bound.)",
-                        "Review Last Application (Did I follow through? Why or why not? What needs to change?)"
-                    ] %}
-                    <div class="row">
-                        {% for i in range(1, 11) %}
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label for="question_{{ i }}" class="form-label">Question {{ i }}</label>
-                                <textarea class="form-control" id="question_{{ i }}" name="question_{{ i }}" 
-                                          rows="3" placeholder="{{ default_questions[i-1] }}">{{ default_questions[i-1] }}</textarea>
-                            </div>
-                        </div>
-                        {% endfor %}
-                    </div>
-                </div>
-            </div>
-
-            <div class="card mt-4">
-                <div class="card-header">
+                <div class="card-header d-flex justify-content-between align-items-center">
                     <h5 class="mb-0"><i class="fas fa-file-text me-2"></i>Passage Text</h5>
+                    <button type="button" id="preview-analysis" class="btn btn-sm btn-secondary">
+                        <i class="fas fa-chart-bar me-1"></i>Preview Analysis
+                    </button>
                 </div>
                 <div class="card-body">
                     <div class="mb-3">
@@ -82,8 +59,57 @@
                             This text will be analyzed for word frequency and common phrases
                         </div>
                     </div>
+                    
+                    <!-- Analysis Preview Section -->
+                    <div id="analysis-preview" style="display: none;">
+                        <hr>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6><i class="fas fa-chart-bar me-2"></i>Top Words</h6>
+                                <div id="word-freq-preview" class="small"></div>
+                            </div>
+                            <div class="col-md-6">
+                                <h6><i class="fas fa-link me-2"></i>Common Phrases</h6>
+                                <div id="bigram-freq-preview" class="small"></div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
+
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-question-circle me-2"></i>Reflection Questions</h5>
+                </div>
+                <div class="card-body">
+                    {% set question_data = [
+                        {"title": "Read the Text Twice", "desc": "Take notes or underline key words or repeated ideas."},
+                        {"title": "Why Was This Written?", "desc": "What situation or problem is being addressed?"},
+                        {"title": "What's the Overall Message?", "desc": "Summarize the passage's main idea in 1–2 sentences."},
+                        {"title": "What Principle or Truth Does It Teach?", "desc": "What timeless truth is revealed about God, life, or human nature?"},
+                        {"title": "What Does It Say About God, Christ, or the Holy Spirit?", "desc": "Note any attributes, actions, or promises."},
+                        {"title": "What Does It Say About the Nature of Man?", "desc": "What does this reveal about our tendencies, sins, or needs?"},
+                        {"title": "What New Insight or Reminder Did I Gain?", "desc": "What stood out as fresh or convincing?"},
+                        {"title": "If God Gave Me Only This Passage, What Is He Saying to Me?", "desc": "What would the Lord want me to hear or do?"},
+                        {"title": "Personal Application — What Will I Do and When?", "desc": "Be specific, realistic, and time bound."},
+                        {"title": "Review Last Application", "desc": "Did I follow through? Why or why not? What needs to change?"}
+                    ] %}
+                    <div class="row">
+                        {% for i in range(1, 11) %}
+                        <div class="col-md-6">
+                            <div class="mb-4">
+                                <h6 class="fw-bold mb-1">{{ question_data[i-1].title }}</h6>
+                                <p class="text-muted small mb-2">{{ question_data[i-1].desc }}</p>
+                                <textarea class="form-control" id="question_{{ i }}" name="question_{{ i }}" 
+                                          rows="3" placeholder="Enter your reflection..."></textarea>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+
 
             <div class="mt-4 mb-5">
                 <button type="submit" class="btn btn-primary btn-lg">
@@ -98,12 +124,93 @@
 </div>
 
 <script>
-// Set today's date as default
+// Set today's date as default and add functionality
 document.addEventListener('DOMContentLoaded', function() {
     const dateInput = document.getElementById('date');
+    const passageInput = document.getElementById('passage');
+    const bibleGatewayLink = document.getElementById('bible-gateway-link');
+    const previewButton = document.getElementById('preview-analysis');
+    const passageTextArea = document.getElementById('passage_text');
+    const analysisPreview = document.getElementById('analysis-preview');
+    
+    // Set today's date
     if (!dateInput.value) {
         const today = new Date().toISOString().split('T')[0];
         dateInput.value = today;
+    }
+    
+    // Generate Bible Gateway link when passage is entered
+    passageInput.addEventListener('input', function() {
+        const passage = this.value.trim();
+        if (passage) {
+            const encodedPassage = encodeURIComponent(passage);
+            const url = `https://www.biblegateway.com/passage/?search=${encodedPassage}&version=ESV`;
+            bibleGatewayLink.querySelector('a').href = url;
+            bibleGatewayLink.style.display = 'block';
+        } else {
+            bibleGatewayLink.style.display = 'none';
+        }
+    });
+    
+    // Preview analysis functionality
+    previewButton.addEventListener('click', function() {
+        const passageText = passageTextArea.value.trim();
+        if (!passageText) {
+            alert('Please enter the passage text first.');
+            return;
+        }
+        
+        // Show loading state
+        this.disabled = true;
+        this.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Analyzing...';
+        
+        // Send request to analyze text
+        fetch('/analyze_text', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ text: passageText })
+        })
+        .then(response => response.json())
+        .then(data => {
+            displayAnalysis(data.word_freq, data.bigram_freq);
+            analysisPreview.style.display = 'block';
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error analyzing text. Please try again.');
+        })
+        .finally(() => {
+            // Reset button
+            this.disabled = false;
+            this.innerHTML = '<i class="fas fa-chart-bar me-1"></i>Preview Analysis';
+        });
+    });
+    
+    function displayAnalysis(wordFreq, bigramFreq) {
+        const wordFreqDiv = document.getElementById('word-freq-preview');
+        const bigramFreqDiv = document.getElementById('bigram-freq-preview');
+        
+        // Display word frequency
+        let wordHtml = '';
+        for (const [word, count] of Object.entries(wordFreq)) {
+            wordHtml += `<div class="d-flex justify-content-between mb-1">
+                <span>${word}</span>
+                <span class="badge bg-primary">${count}</span>
+            </div>`;
+        }
+        wordFreqDiv.innerHTML = wordHtml || '<p class="text-muted">No significant words found.</p>';
+        
+        // Display bigram frequency
+        let bigramHtml = '';
+        for (const [phrase, count] of Object.entries(bigramFreq)) {
+            bigramHtml += `<div class="d-flex justify-content-between mb-1">
+                <span>${phrase}</span>
+                <span class="badge bg-secondary">${count}</span>
+            </div>`;
+        }
+        bigramFreqDiv.innerHTML = bigramHtml || '<p class="text-muted">No significant phrases found.</p>';
     }
 });
 </script>

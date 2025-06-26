@@ -1,4 +1,4 @@
-from flask import render_template, request, redirect, url_for, flash
+from flask import render_template, request, redirect, url_for, flash, jsonify
 from flask_login import login_required, current_user
 from app import app, db
 from models import StudySession
@@ -143,3 +143,25 @@ def edit_study(id):
             db.session.rollback()
     
     return render_template('study_detail.html', study=study, edit_mode=True)
+
+@app.route('/analyze_text', methods=['POST'])
+@login_required
+def analyze_text_api():
+    """API endpoint for text analysis preview"""
+    try:
+        data = request.get_json()
+        text = data.get('text', '')
+        
+        if not text:
+            return jsonify({'error': 'No text provided'}), 400
+        
+        # Analyze the text
+        word_freq, bigram_freq = analyze_text(text)
+        
+        return jsonify({
+            'word_freq': word_freq,
+            'bigram_freq': bigram_freq
+        })
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
