@@ -1,0 +1,8 @@
+build:
+  buildCommand: pip install .
+
+deploy:
+  startCommand: gunicorn --bind 0.0.0.0:$PORT --workers 2 --threads 2 --timeout 60 --preload main:app
+  healthcheckPath: /
+  healthcheckTimeout: 300
+  restartPolicyType: always

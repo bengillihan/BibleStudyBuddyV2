@@ -104,3 +104,4 @@ Changelog:
 - June 26, 2025: Doubled answer box height (6 rows) for better writing experience
 - June 26, 2025: Fixed text visibility issues in study view by adding proper contrast
 - June 26, 2025: Updated favicon to clean Bible book design with red cross
+- June 26, 2025: Fixed Railway deployment configuration by adding railway.yaml, Procfile, and runtime.txt to ensure Gunicorn is used instead of Flask dev server
