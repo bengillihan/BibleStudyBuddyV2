@@ -95,5 +95,6 @@ Changelog:
 - June 26, 2025: Initial setup with Flask, Google OAuth, and Supabase integration
 - June 26, 2025: Updated app name to "Bible Study Buddy"
 - June 26, 2025: Configured Google OAuth for dual environment support (dev + Railway production)
-- June 26, 2025: Created PostgreSQL database in Replit and imported 15 historical Bible studies
+- June 26, 2025: Created PostgreSQL database in Replit and imported 15 historical Bible studies for Ben Gillihan
 - June 26, 2025: Fixed template error causing 500 error on production (removed undefined moment() function)
+- June 26, 2025: Updated study form with question labels above inputs, Bible Gateway ESV links, and text analysis preview
