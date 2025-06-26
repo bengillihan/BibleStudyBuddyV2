@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <defs>
+    <style>
+      .book { fill: #4a5568; }
+      .pages { fill: #f7fafc; }
+      .bookmark { fill: #ed8936; }
+      .cross { fill: #38a169; }
+    </style>
+  </defs>
+  
+  <!-- Book cover -->
+  <rect x="6" y="4" width="20" height="24" rx="1" class="book"/>
+  
+  <!-- Book pages -->
+  <rect x="8" y="6" width="16" height="20" rx="0.5" class="pages"/>
+  <line x1="10" y1="10" x2="22" y2="10" stroke="#e2e8f0" stroke-width="0.5"/>
+  <line x1="10" y1="12" x2="22" y2="12" stroke="#e2e8f0" stroke-width="0.5"/>
+  <line x1="10" y1="14" x2="20" y2="14" stroke="#e2e8f0" stroke-width="0.5"/>
+  <line x1="10" y1="16" x2="22" y2="16" stroke="#e2e8f0" stroke-width="0.5"/>
+  <line x1="10" y1="18" x2="19" y2="18" stroke="#e2e8f0" stroke-width="0.5"/>
+  <line x1="10" y1="20" x2="22" y2="20" stroke="#e2e8f0" stroke-width="0.5"/>
+  <line x1="10" y1="22" x2="18" y2="22" stroke="#e2e8f0" stroke-width="0.5"/>
+  
+  <!-- Bookmark ribbon -->
+  <rect x="23" y="4" width="2" height="12" class="bookmark"/>
+  <polygon points="23,16 25,16 24,14" class="bookmark"/>
+  
+  <!-- Small cross on cover -->
+  <g class="cross">
+    <rect x="15" y="8" width="0.8" height="4" rx="0.2"/>
+    <rect x="13.4" y="9.6" width="4" height="0.8" rx="0.2"/>
+  </g>
+</svg>
