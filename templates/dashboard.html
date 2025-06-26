@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Bible Study App{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1><i class="fas fa-tachometer-alt me-2"></i>Dashboard</h1>
+            <a href="{{ url_for('new_study') }}" class="btn btn-primary">
+                <i class="fas fa-plus me-1"></i>New Study
+            </a>
+        </div>
+
+        {% if studies %}
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-clock me-2"></i>Recent Studies
+                    <span class="badge bg-secondary ms-2">{{ studies|length }}</span>
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    {% for study in studies %}
+                    <div class="col-md-6 col-lg-4 mb-3">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <h6 class="card-title">
+                                    <i class="fas fa-book me-1"></i>{{ study.passage }}
+                                </h6>
+                                <p class="card-text">
+                                    <small class="text-muted">
+                                        <i class="fas fa-calendar me-1"></i>{{ study.date.strftime('%B %d, %Y') }}
+                                    </small>
+                                </p>
+                                <p class="card-text">
+                                    <small class="text-muted">
+                                        Last updated: {{ study.updated_at.strftime('%m/%d/%Y at %I:%M %p') }}
+                                    </small>
+                                </p>
+                            </div>
+                            <div class="card-footer">
+                                <a href="{{ url_for('study_detail', id=study.id) }}" class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-eye me-1"></i>View/Edit
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-3">
+            <a href="{{ url_for('studies') }}" class="btn btn-outline-secondary">
+                <i class="fas fa-list me-1"></i>View All Studies
+            </a>
+        </div>
+        {% else %}
+        <div class="text-center py-5">
+            <i class="fas fa-book-open fa-3x text-muted mb-3"></i>
+            <h3 class="text-muted">No studies yet</h3>
+            <p class="text-muted">Create your first Bible study session to get started.</p>
+            <a href="{{ url_for('new_study') }}" class="btn btn-primary">
+                <i class="fas fa-plus me-1"></i>Create Your First Study
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block title %}Login - Bible Study App{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6 col-lg-4">
+        <div class="card">
+            <div class="card-body text-center">
+                <h1 class="card-title mb-4">
+                    <i class="fas fa-book-open text-primary me-2"></i>
+                    Bible Study App
+                </h1>
+                <p class="card-text mb-4">
+                    Welcome to your personal Bible study companion. 
+                    Create detailed study sessions, analyze scripture text, 
+                    and track your spiritual journey.
+                </p>
+                
+                <a href="{{ url_for('google_auth.login') }}" class="btn btn-primary btn-lg">
+                    <i class="fab fa-google me-2"></i>
+                    Sign in with Google
+                </a>
+                
+                <hr class="my-4">
+                
+                <div class="text-muted">
+                    <h6>Features:</h6>
+                    <ul class="list-unstyled">
+                        <li><i class="fas fa-check text-success me-1"></i> Track your Bible studies</li>
+                        <li><i class="fas fa-check text-success me-1"></i> Analyze scripture text</li>
+                        <li><i class="fas fa-check text-success me-1"></i> Reflection questions</li>
+                        <li><i class="fas fa-check text-success me-1"></i> Word frequency analysis</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
