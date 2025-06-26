@@ -98,3 +98,5 @@ Changelog:
 - June 26, 2025: Created PostgreSQL database in Replit and imported 15 historical Bible studies for Ben Gillihan
 - June 26, 2025: Fixed template error causing 500 error on production (removed undefined moment() function)
 - June 26, 2025: Updated study form with question labels above inputs, Bible Gateway ESV links, and text analysis preview
+- June 26, 2025: Fixed study detail template error using enumerate (production 500 error)
+- June 26, 2025: Enhanced text analysis to group word variations and only show words/phrases appearing more than once

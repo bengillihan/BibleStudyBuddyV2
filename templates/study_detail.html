@@ -115,11 +115,24 @@
                         <h5 class="mb-0"><i class="fas fa-question-circle me-2"></i>Reflection Questions</h5>
                     </div>
                     <div class="card-body">
-                        {% for i, question in enumerate(study.get_questions(), 1) %}
+                        {% set question_data = [
+                            {"title": "Read the Text Twice", "desc": "Take notes or underline key words or repeated ideas."},
+                            {"title": "Why Was This Written?", "desc": "What situation or problem is being addressed?"},
+                            {"title": "What's the Overall Message?", "desc": "Summarize the passage's main idea in 1–2 sentences."},
+                            {"title": "What Principle or Truth Does It Teach?", "desc": "What timeless truth is revealed about God, life, or human nature?"},
+                            {"title": "What Does It Say About God, Christ, or the Holy Spirit?", "desc": "Note any attributes, actions, or promises."},
+                            {"title": "What Does It Say About the Nature of Man?", "desc": "What does this reveal about our tendencies, sins, or needs?"},
+                            {"title": "What New Insight or Reminder Did I Gain?", "desc": "What stood out as fresh or convincing?"},
+                            {"title": "If God Gave Me Only This Passage, What Is He Saying to Me?", "desc": "What would the Lord want me to hear or do?"},
+                            {"title": "Personal Application — What Will I Do and When?", "desc": "Be specific, realistic, and time bound."},
+                            {"title": "Review Last Application", "desc": "Did I follow through? Why or why not? What needs to change?"}
+                        ] %}
+                        {% for question in study.get_questions() %}
                             {% if question %}
-                            <div class="mb-3">
-                                <h6>Question {{ i }}:</h6>
-                                <p class="text-muted">{{ question }}</p>
+                            <div class="mb-4">
+                                <h6 class="fw-bold mb-1">{{ question_data[loop.index0].title }}</h6>
+                                <p class="text-muted small mb-2">{{ question_data[loop.index0].desc }}</p>
+                                <div class="bg-light p-3 rounded">{{ question }}</div>
                             </div>
                             {% endif %}
                         {% endfor %}
