@@ -1,8 +1,8 @@
-# Bible Study Application
+# Bible Study Buddy
 
 ## Overview
 
-This is a web-based Bible study application built with Flask that allows users to create, manage, and analyze their personal Bible study sessions. The application features Google OAuth authentication, study session management with reflection questions, and text analysis capabilities for scripture passages.
+This is a web-based Bible study application called "Bible Study Buddy" built with Flask that allows users to create, manage, and analyze their personal Bible study sessions. The application features Google OAuth authentication, study session management with reflection questions, and text analysis capabilities for scripture passages.
 
 ## System Architecture
 
