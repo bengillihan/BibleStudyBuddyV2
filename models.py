@@ -59,9 +59,12 @@ class StudySession(db.Model):
                 setattr(self, question_attrs[i], question)
     
     def get_word_freq(self):
-        """Get word frequency as dictionary"""
+        """Get word frequency as dictionary sorted by frequency"""
         if self.word_freq_json:
-            return json.loads(self.word_freq_json)
+            word_freq = json.loads(self.word_freq_json)
+            # Return as OrderedDict sorted by frequency (descending)
+            from collections import OrderedDict
+            return OrderedDict(sorted(word_freq.items(), key=lambda x: x[1], reverse=True))
         return {}
     
     def set_word_freq(self, word_freq_dict):
@@ -69,9 +72,12 @@ class StudySession(db.Model):
         self.word_freq_json = json.dumps(word_freq_dict)
     
     def get_bigram_freq(self):
-        """Get bigram frequency as dictionary"""
+        """Get bigram frequency as dictionary sorted by frequency"""
         if self.bigram_freq_json:
-            return json.loads(self.bigram_freq_json)
+            bigram_freq = json.loads(self.bigram_freq_json)
+            # Return as OrderedDict sorted by frequency (descending)
+            from collections import OrderedDict
+            return OrderedDict(sorted(bigram_freq.items(), key=lambda x: x[1], reverse=True))
         return {}
     
     def set_bigram_freq(self, bigram_freq_dict):

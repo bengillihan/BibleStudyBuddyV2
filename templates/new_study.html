@@ -192,9 +192,10 @@ document.addEventListener('DOMContentLoaded', function() {
         const wordFreqDiv = document.getElementById('word-freq-preview');
         const bigramFreqDiv = document.getElementById('bigram-freq-preview');
         
-        // Display word frequency
+        // Display word frequency - sort by count descending
         let wordHtml = '';
-        for (const [word, count] of Object.entries(wordFreq)) {
+        const sortedWords = Object.entries(wordFreq).sort((a, b) => b[1] - a[1]);
+        for (const [word, count] of sortedWords) {
             wordHtml += `<div class="d-flex justify-content-between mb-1">
                 <span>${word}</span>
                 <span class="badge bg-primary">${count}</span>
@@ -202,9 +203,10 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         wordFreqDiv.innerHTML = wordHtml || '<p class="text-muted">No significant words found.</p>';
         
-        // Display bigram frequency
+        // Display bigram frequency - sort by count descending
         let bigramHtml = '';
-        for (const [phrase, count] of Object.entries(bigramFreq)) {
+        const sortedBigrams = Object.entries(bigramFreq).sort((a, b) => b[1] - a[1]);
+        for (const [phrase, count] of sortedBigrams) {
             bigramHtml += `<div class="d-flex justify-content-between mb-1">
                 <span>${phrase}</span>
                 <span class="badge bg-secondary">${count}</span>
