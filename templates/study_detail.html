@@ -444,6 +444,26 @@ document.addEventListener('DOMContentLoaded', function() {
     .catch(error => {
         console.error('Draft loading error:', error);
     });
+
+    // Handle form submission to clear draft
+    document.querySelector('form').addEventListener('submit', function() {
+        // Clear the autosave interval
+        if (autosaveInterval) {
+            clearInterval(autosaveInterval);
+        }
+        
+        // Clear the draft upon successful submission
+        fetch('/clear_draft', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ study_id: '{{ study.id }}' })
+        })
+        .catch(error => {
+            console.error('Draft clearing error:', error);
+        });
+    });
 });
 </script>
 {% endif %}

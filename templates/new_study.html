@@ -112,7 +112,7 @@
 
 
             <div class="mt-4 mb-5">
-                <button type="submit" class="btn btn-primary btn-lg">
+                <button type="submit" class="btn btn-primary btn-lg" id="submit-button">
                     <i class="fas fa-save me-1"></i>Create Study Session
                 </button>
                 <a href="{{ url_for('dashboard') }}" class="btn btn-secondary ms-2">
@@ -319,6 +319,26 @@ document.addEventListener('DOMContentLoaded', function() {
     })
     .catch(error => {
         console.error('Draft loading error:', error);
+    });
+
+    // Handle form submission to clear draft
+    document.getElementById('study-form').addEventListener('submit', function() {
+        // Clear the autosave interval
+        if (autosaveInterval) {
+            clearInterval(autosaveInterval);
+        }
+        
+        // Clear the draft upon successful submission
+        fetch('/clear_draft', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ study_id: 'new' })
+        })
+        .catch(error => {
+            console.error('Draft clearing error:', error);
+        });
     });
 });
 </script>

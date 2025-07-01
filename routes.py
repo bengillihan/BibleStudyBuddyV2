@@ -214,3 +214,22 @@ def load_draft():
         
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
+@app.route('/clear_draft', methods=['POST'])
+@login_required
+def clear_draft():
+    """API endpoint for clearing saved drafts"""
+    try:
+        data = request.get_json()
+        draft_key = f"draft_{current_user.id}_{data.get('study_id', 'new')}"
+        
+        if draft_key in session:
+            del session[draft_key]
+        
+        return jsonify({
+            'success': True,
+            'message': 'Draft cleared'
+        })
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500

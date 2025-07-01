@@ -106,3 +106,5 @@ Changelog:
 - June 26, 2025: Updated favicon to clean Bible book design with red cross
 - June 26, 2025: Fixed Railway deployment configuration by adding railway.yaml, Procfile, and runtime.txt to ensure Gunicorn is used instead of Flask dev server
 - June 26, 2025: Enhanced OAuth system to dynamically handle any domain (bsb.bengillihan.com, Railway URLs, etc.) with improved error handling and debugging
+- June 28, 2025: Fixed text analysis sorting to display words and phrases by frequency (highest to lowest) instead of alphabetical order
+- July 1, 2025: Added autosave functionality that saves study drafts every 5 minutes to prevent data loss from Railway timeouts
