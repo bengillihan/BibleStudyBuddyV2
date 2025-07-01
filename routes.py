@@ -1,4 +1,4 @@
-from flask import render_template, request, redirect, url_for, flash, jsonify
+from flask import render_template, request, redirect, url_for, flash, jsonify, session
 from flask_login import login_required, current_user
 from app import app, db
 from models import StudySession
@@ -162,6 +162,55 @@ def analyze_text_api():
             'word_freq': word_freq,
             'bigram_freq': bigram_freq
         })
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/autosave_draft', methods=['POST'])
+@login_required
+def autosave_draft():
+    """API endpoint for autosaving study drafts"""
+    try:
+        data = request.get_json()
+        draft_key = f"draft_{current_user.id}_{data.get('study_id', 'new')}"
+        
+        # Store draft data in session or a simple cache
+        # For simplicity, we'll use session storage
+        session[draft_key] = {
+            'passage': data.get('passage', ''),
+            'date': data.get('date', ''),
+            'passage_text': data.get('passage_text', ''),
+            'questions': {f'question_{i}': data.get(f'question_{i}', '') for i in range(1, 11)},
+            'last_saved': datetime.utcnow().isoformat()
+        }
+        
+        return jsonify({
+            'success': True,
+            'message': 'Draft saved automatically',
+            'timestamp': session[draft_key]['last_saved']
+        })
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/load_draft', methods=['POST'])
+@login_required
+def load_draft():
+    """API endpoint for loading saved drafts"""
+    try:
+        data = request.get_json()
+        draft_key = f"draft_{current_user.id}_{data.get('study_id', 'new')}"
+        
+        if draft_key in session:
+            return jsonify({
+                'success': True,
+                'draft': session[draft_key]
+            })
+        else:
+            return jsonify({
+                'success': False,
+                'message': 'No draft found'
+            })
         
     except Exception as e:
         return jsonify({'error': str(e)}), 500

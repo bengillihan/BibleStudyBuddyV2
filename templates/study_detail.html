@@ -338,6 +338,112 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         bigramFreqDiv.innerHTML = bigramHtml || '<p class="text-muted">No significant phrases found.</p>';
     }
+
+    // Autosave functionality for edit mode
+    let autosaveInterval;
+    let lastSaveStatus = document.createElement('div');
+    lastSaveStatus.className = 'small text-muted mt-2';
+    lastSaveStatus.style.display = 'none';
+    document.querySelector('.container').appendChild(lastSaveStatus);
+
+    function collectFormData() {
+        const formData = {
+            study_id: '{{ study.id }}',
+            passage: document.getElementById('passage').value,
+            date: document.getElementById('date').value,
+            passage_text: document.getElementById('passage_text').value
+        };
+        
+        // Collect all questions
+        for (let i = 1; i <= 10; i++) {
+            const questionElement = document.getElementById(`question_${i}`);
+            if (questionElement) {
+                formData[`question_${i}`] = questionElement.value;
+            }
+        }
+        
+        return formData;
+    }
+
+    function autosave() {
+        const formData = collectFormData();
+        
+        // Only save if there's some content
+        const hasContent = formData.passage || formData.passage_text || 
+                          Object.keys(formData).some(key => key.startsWith('question_') && formData[key]);
+        
+        if (!hasContent) return;
+
+        fetch('/autosave_draft', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(formData)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const now = new Date().toLocaleTimeString();
+                lastSaveStatus.innerHTML = `<i class="fas fa-check-circle text-success me-1"></i>Draft saved automatically at ${now}`;
+                lastSaveStatus.style.display = 'block';
+                
+                // Hide the message after 3 seconds
+                setTimeout(() => {
+                    lastSaveStatus.style.display = 'none';
+                }, 3000);
+            }
+        })
+        .catch(error => {
+            console.error('Autosave error:', error);
+        });
+    }
+
+    // Start autosave every 5 minutes (300,000 milliseconds)
+    autosaveInterval = setInterval(autosave, 300000);
+
+    // Also save when user leaves the page
+    window.addEventListener('beforeunload', function() {
+        autosave();
+    });
+
+    // Load any existing draft on page load
+    fetch('/load_draft', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ study_id: '{{ study.id }}' })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success && data.draft) {
+            const draft = data.draft;
+            
+            // Ask user if they want to restore the draft
+            if (confirm('A saved draft was found. Would you like to restore it?')) {
+                document.getElementById('passage').value = draft.passage || '';
+                document.getElementById('date').value = draft.date || '';
+                document.getElementById('passage_text').value = draft.passage_text || '';
+                
+                // Restore questions
+                for (let i = 1; i <= 10; i++) {
+                    const questionElement = document.getElementById(`question_${i}`);
+                    if (questionElement && draft.questions[`question_${i}`]) {
+                        questionElement.value = draft.questions[`question_${i}`];
+                    }
+                }
+                
+                // Update Bible Gateway link if passage exists
+                if (draft.passage) {
+                    passageInput.dispatchEvent(new Event('input'));
+                }
+            }
+        }
+    })
+    .catch(error => {
+        console.error('Draft loading error:', error);
+    });
 });
 </script>
 {% endif %}
