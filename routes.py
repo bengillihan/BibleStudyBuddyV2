@@ -1,3 +1,6 @@
+import os
+import requests as http_client
+
 from flask import render_template, request, redirect, url_for, flash, jsonify
 from flask_login import login_required, current_user
 from app import app, db
@@ -147,22 +150,60 @@ def edit_study(id):
 @app.route('/analyze_text', methods=['POST'])
 @login_required
 def analyze_text_api():
-    """API endpoint for text analysis preview"""
     try:
         data = request.get_json()
         text = data.get('text', '')
-        
         if not text:
             return jsonify({'error': 'No text provided'}), 400
-        
-        # Analyze the text
         word_freq, bigram_freq = analyze_text(text)
-        
-        return jsonify({
-            'word_freq': word_freq,
-            'bigram_freq': bigram_freq
-        })
-        
+        return jsonify({'word_freq': word_freq, 'bigram_freq': bigram_freq})
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
+@app.route('/fetch_passage', methods=['POST'])
+@login_required
+def fetch_passage():
+    data = request.get_json()
+    passage = (data.get('passage') or '').strip()
+    if not passage:
+        return jsonify({'error': 'No passage provided'}), 400
+
+    esv_key = os.environ.get('ESV_API_KEY')
+    if esv_key:
+        try:
+            resp = http_client.get(
+                'https://api.esv.org/v3/passage/text/',
+                params={
+                    'q': passage,
+                    'include-headings': False,
+                    'include-footnotes': False,
+                    'include-verse-numbers': True,
+                    'include-short-copyright': False,
+                    'include-passage-references': False,
+                },
+                headers={'Authorization': f'Token {esv_key}'},
+                timeout=10,
+            )
+            if resp.ok:
+                passages = resp.json().get('passages', [])
+                if passages:
+                    return jsonify({'text': passages[0].strip(), 'translation': 'ESV'})
+        except Exception:
+            pass
+
+    # Fallback: bible-api.com (WEB translation, no key required)
+    try:
+        resp = http_client.get(
+            f'https://bible-api.com/{passage}',
+            params={'translation': 'web'},
+            timeout=10,
+        )
+        if resp.ok:
+            result = resp.json()
+            if 'text' in result:
+                return jsonify({'text': result['text'].strip(), 'translation': 'WEB'})
+    except Exception:
+        pass
+
+    return jsonify({'error': 'Could not fetch passage — check the reference and try again.'}), 500
 

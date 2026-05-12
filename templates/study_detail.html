@@ -27,14 +27,15 @@
                                 <label for="passage" class="form-label">
                                     <i class="fas fa-book me-1"></i>Bible Passage *
                                 </label>
-                                <input type="text" class="form-control" id="passage" name="passage" 
-                                       value="{{ study.passage }}" required>
-                                <div class="form-text">Enter the specific verses you're studying</div>
-                                <div id="bible-gateway-link" class="mt-2">
-                                    <a href="https://www.biblegateway.com/passage/?search={{ study.passage | urlencode }}&version=ESV" target="_blank" class="btn btn-sm btn-outline-primary">
-                                        <i class="fas fa-external-link-alt me-1"></i>Open in Bible Gateway (ESV)
-                                    </a>
+                                <div class="input-group">
+                                    <input type="text" class="form-control" id="passage" name="passage"
+                                           value="{{ study.passage }}" required>
+                                    <button type="button" class="btn btn-outline-secondary" id="fetch-text-btn" aria-label="Fetch passage text">
+                                        <i class="fas fa-download me-1"></i>Fetch Text
+                                    </button>
                                 </div>
+                                <div class="form-text">Change the passage then click Fetch Text to reload and re-analyze</div>
+                                <div id="fetch-status" class="mt-1 small"></div>
                             </div>
                         </div>
                         <div class="col-md-4">
@@ -70,7 +71,7 @@
                     </div>
                     
                     <!-- Analysis Preview Section -->
-                    <div id="analysis-preview" style="display: none;">
+                    <div id="analysis-preview" class="d-none">
                         <hr>
                         <div class="row">
                             <div class="col-md-6">
@@ -186,7 +187,7 @@
                         <h5 class="mb-0"><i class="fas fa-file-text me-2"></i>Passage Text</h5>
                     </div>
                     <div class="card-body">
-                        <div class="bg-light p-3 rounded text-dark" style="white-space: pre-wrap;">{{ study.passage_text }}</div>
+                        <div class="bg-light p-3 rounded text-dark passage-text">{{ study.passage_text }}</div>
                     </div>
                 </div>
             </div>
@@ -255,90 +256,84 @@
 {% block scripts %}
 {% if edit_mode %}
 <script>
-// Add functionality for edit form
 document.addEventListener('DOMContentLoaded', function() {
     const passageInput = document.getElementById('passage');
-    const bibleGatewayLink = document.getElementById('bible-gateway-link');
+    const fetchBtn = document.getElementById('fetch-text-btn');
+    const fetchStatus = document.getElementById('fetch-status');
     const previewButton = document.getElementById('preview-analysis');
     const passageTextArea = document.getElementById('passage_text');
     const analysisPreview = document.getElementById('analysis-preview');
-    
-    // Generate Bible Gateway link when passage is changed
-    passageInput.addEventListener('input', function() {
-        const passage = this.value.trim();
-        if (passage) {
-            const encodedPassage = encodeURIComponent(passage);
-            const url = `https://www.biblegateway.com/passage/?search=${encodedPassage}&version=ESV`;
-            bibleGatewayLink.querySelector('a').href = url;
-            bibleGatewayLink.style.display = 'block';
-        } else {
-            bibleGatewayLink.style.display = 'none';
+
+    function displayAnalysis(wordFreq, bigramFreq) {
+        const wordFreqDiv = document.getElementById('word-freq-preview');
+        const bigramFreqDiv = document.getElementById('bigram-freq-preview');
+        let wordHtml = '';
+        for (const [word, count] of Object.entries(wordFreq).sort((a, b) => b[1] - a[1])) {
+            wordHtml += `<div class="d-flex justify-content-between mb-1"><span>${word}</span><span class="badge bg-primary">${count}</span></div>`;
         }
-    });
-    
-    // Preview analysis functionality
-    previewButton.addEventListener('click', function() {
-        const passageText = passageTextArea.value.trim();
-        if (!passageText) {
-            alert('Please enter the passage text first.');
+        wordFreqDiv.innerHTML = wordHtml || '<p class="text-muted">No significant words found.</p>';
+        let bigramHtml = '';
+        for (const [phrase, count] of Object.entries(bigramFreq).sort((a, b) => b[1] - a[1])) {
+            bigramHtml += `<div class="d-flex justify-content-between mb-1"><span>${phrase}</span><span class="badge bg-secondary">${count}</span></div>`;
+        }
+        bigramFreqDiv.innerHTML = bigramHtml || '<p class="text-muted">No significant phrases found.</p>';
+        analysisPreview.classList.remove('d-none');
+    }
+
+    function runAnalysis(text) {
+        return fetch('/analyze_text', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ text })
+        })
+        .then(r => r.json())
+        .then(data => displayAnalysis(data.word_freq, data.bigram_freq));
+    }
+
+    fetchBtn.addEventListener('click', function() {
+        const passage = passageInput.value.trim();
+        if (!passage) {
+            fetchStatus.innerHTML = '<span class="text-warning">Enter a passage reference first.</span>';
             return;
         }
-        
-        // Show loading state
         this.disabled = true;
-        this.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Analyzing...';
-        
-        // Send request to analyze text
-        fetch('/analyze_text', {
+        this.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Fetching...';
+        fetchStatus.innerHTML = '';
+
+        fetch('/fetch_passage', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ text: passageText })
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ passage })
         })
-        .then(response => response.json())
+        .then(r => r.json())
         .then(data => {
-            displayAnalysis(data.word_freq, data.bigram_freq);
-            analysisPreview.style.display = 'block';
+            if (data.error) {
+                fetchStatus.innerHTML = `<span class="text-danger">${data.error}</span>`;
+                return;
+            }
+            passageTextArea.value = data.text;
+            fetchStatus.innerHTML = `<span class="text-success"><i class="fas fa-check me-1"></i>Fetched (${data.translation})</span>`;
+            return runAnalysis(data.text);
         })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('Error analyzing text. Please try again.');
+        .catch(() => {
+            fetchStatus.innerHTML = '<span class="text-danger">Network error — try again.</span>';
         })
         .finally(() => {
-            // Reset button
+            this.disabled = false;
+            this.innerHTML = '<i class="fas fa-download me-1"></i>Fetch Text';
+        });
+    });
+
+    previewButton.addEventListener('click', function() {
+        const text = passageTextArea.value.trim();
+        if (!text) { alert('Please enter the passage text first.'); return; }
+        this.disabled = true;
+        this.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Analyzing...';
+        runAnalysis(text).finally(() => {
             this.disabled = false;
             this.innerHTML = '<i class="fas fa-chart-bar me-1"></i>Preview Analysis';
         });
     });
-    
-    function displayAnalysis(wordFreq, bigramFreq) {
-        const wordFreqDiv = document.getElementById('word-freq-preview');
-        const bigramFreqDiv = document.getElementById('bigram-freq-preview');
-        
-        // Display word frequency - sort by count descending
-        let wordHtml = '';
-        const sortedWords = Object.entries(wordFreq).sort((a, b) => b[1] - a[1]);
-        for (const [word, count] of sortedWords) {
-            wordHtml += `<div class="d-flex justify-content-between mb-1">
-                <span>${word}</span>
-                <span class="badge bg-primary">${count}</span>
-            </div>`;
-        }
-        wordFreqDiv.innerHTML = wordHtml || '<p class="text-muted">No significant words found.</p>';
-        
-        // Display bigram frequency - sort by count descending
-        let bigramHtml = '';
-        const sortedBigrams = Object.entries(bigramFreq).sort((a, b) => b[1] - a[1]);
-        for (const [phrase, count] of sortedBigrams) {
-            bigramHtml += `<div class="d-flex justify-content-between mb-1">
-                <span>${phrase}</span>
-                <span class="badge bg-secondary">${count}</span>
-            </div>`;
-        }
-        bigramFreqDiv.innerHTML = bigramHtml || '<p class="text-muted">No significant phrases found.</p>';
-    }
-
 });
 </script>
 {% endif %}
