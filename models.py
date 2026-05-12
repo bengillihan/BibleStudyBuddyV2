@@ -1,5 +1,6 @@
 from app import db
 from flask_login import UserMixin
+from collections import OrderedDict
 from datetime import datetime
 import json
 
@@ -63,7 +64,6 @@ class StudySession(db.Model):
         if self.word_freq_json:
             word_freq = json.loads(self.word_freq_json)
             # Return as OrderedDict sorted by frequency (descending)
-            from collections import OrderedDict
             return OrderedDict(sorted(word_freq.items(), key=lambda x: x[1], reverse=True))
         return {}
     

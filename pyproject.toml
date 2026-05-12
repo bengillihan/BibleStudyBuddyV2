@@ -1,10 +1,9 @@
 [project]
-name = "repl-nix-workspace"
+name = "bible-study-buddy"
 version = "0.1.0"
-description = "Add your description here"
+description = "A Flask web app for managing personal Bible study sessions with text analysis"
 requires-python = ">=3.11"
 dependencies = [
-    "email-validator>=2.2.0",
     "flask-login>=0.6.3",
     "flask>=3.1.1",
     "flask-sqlalchemy>=3.1.1",
